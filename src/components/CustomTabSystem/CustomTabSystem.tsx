@@ -47,19 +47,19 @@ const CustomTabSystem: React.FC<TabSystemProps> = ({
     <div className={`w-full drop-shadow ${className}`}>
       {/* Tab Headers */}
       <div className="overflow-x-auto overflow-y-hidden border-b border-gray-200">
-        <div className="flex min-w-max">
+        <div className="flex min-w-max gap-1">
           {tabItems.map((item, index) => (
             <button
               key={index}
               onClick={() => handleTabClick(index)}
               disabled={item.disabled}
               className={`
-                px-6 py-3 text-sm font-medium transition-all rounded-t duration-300 ease-in-out
-                whitespace-nowrap flex-shrink-0
+                px-6 py-3 text-sm font-medium transition-all rounded-t duration-200
+                whitespace-nowrap flex-shrink-0  border-1 border-gray-50
                 ${
                   activeIndex === index
-                    ? "text-white bg-primary transform scale-105"
-                    : "text-gray-500 border-transparent hover:text-primary"
+                    ? "z-1 text-white bg-primary"
+                    : "text-gray-500 hover:text-primary"
                 }
                 ${
                   item.disabled
