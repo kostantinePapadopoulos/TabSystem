@@ -21,7 +21,7 @@ const CustomTabSystem: React.FC<TabSystemProps> = ({
   const [contentHeight, setContentHeight] = useState<number | null>(null);
   const contentRefs = useRef<(HTMLDivElement | null)[]>([]);
 
-  // Update height when active tab changes
+  // Animate height when active tab changes
   useEffect(() => {
     const activeContent = contentRefs.current[activeIndex];
     if (activeContent) {
