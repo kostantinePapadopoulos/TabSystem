@@ -214,7 +214,7 @@ function App() {
       <CustomTabSystem
         tabItems={tabItems}
         // defaultActiveIndex={0}
-        mountAllTabs={true}
+        // mountAllTabs={true}
       />
       <div className="bg-yellow-100 p-10">Div below tab</div>
     </div>
