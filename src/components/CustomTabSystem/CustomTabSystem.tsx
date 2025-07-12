@@ -10,6 +10,9 @@ import ArrowRight from "./src/ArrowRight";
 interface TabSystemProps {
   tabItems: TabItem[]; // Array of tab data
   defaultActiveIndex?: number; // Active tab index onLoad if not provided will show first tab
+  //(keepInactiveTabContentOnBackground Default false) TRUE: Load all tab contents on first load , this will keep the states of each tab content running adn persistent all time, if api calls occur in tab contents all api of all tabs will occur on page load
+  //FALSE: mount the tab content on tab change this will reset state and refetch data f.e everytime we change tabs
+  keepInactiveTabContentOnBackground?: boolean;
 }
 
 //Tab data props
@@ -22,6 +25,7 @@ interface TabItem {
 const CustomTabSystem: React.FC<TabSystemProps> = ({
   tabItems,
   defaultActiveIndex = 0,
+  keepInactiveTabContentOnBackground = false,
 }) => {
   // Find the first non-disabled tab index starting from defaultActiveIndex
   const findNextEnabledTab = (startIndex: number) => {
@@ -66,7 +70,7 @@ const CustomTabSystem: React.FC<TabSystemProps> = ({
 
   // Animate height when active tab changes
   useEffect(() => {
-    if (!activeIndex) return;
+    if (activeIndex === null) return;
     const activeContent = contentRefs.current[activeIndex];
     if (activeContent) {
       setContentHeight(activeContent.scrollHeight);
@@ -75,7 +79,7 @@ const CustomTabSystem: React.FC<TabSystemProps> = ({
 
   // Set initial height after first render
   useEffect(() => {
-    if (!activeIndex) return;
+    if (activeIndex === null) return;
     const activeContent = contentRefs.current[activeIndex];
     if (activeContent && contentHeight === null) {
       setContentHeight(activeContent.scrollHeight);
@@ -217,8 +221,8 @@ const CustomTabSystem: React.FC<TabSystemProps> = ({
                 whitespace-nowrap flex-shrink-0 border border-gray-200
                 ${
                   activeIndex === index
-                    ? "z-[1] text-white bg-blue-600 border-blue-600"
-                    : "text-gray-500 hover:text-blue-600 hover:bg-gray-50"
+                    ? "z-1 text-white bg-primary"
+                    : "text-gray-500 hover:text-primary"
                 }
                 ${
                   item.disabled
@@ -253,7 +257,13 @@ const CustomTabSystem: React.FC<TabSystemProps> = ({
               }
             `}
           >
-            {item.tabContent}
+            {keepInactiveTabContentOnBackground ? (
+              item.tabContent
+            ) : activeIndex === index ? (
+              item.tabContent
+            ) : (
+              <></>
+            )}
           </div>
         ))}
       </div>

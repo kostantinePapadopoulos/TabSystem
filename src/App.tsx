@@ -1,6 +1,24 @@
+import { useState } from "react";
 import CustomTabSystem from "./components/CustomTabSystem/CustomTabSystem";
 
 function App() {
+  const TestComponent = () => {
+    const [count, setCount] = useState<number>(0);
+    return (
+      <div className="space-y-4">
+        <h3 className="text-lg font-semibold text-gray-800">STATE COMPONENT</h3>
+        <div className="text-gray-600 flex flex-col gap-1">
+          <div>Count: {count}</div>
+          <button
+            onClick={() => setCount((prev) => prev + 1)}
+            className="border-1 cursor-pointer"
+          >
+            ADD
+          </button>
+        </div>
+      </div>
+    );
+  };
   const tabItems = [
     {
       tabTitle: "Dashboard Overview",
@@ -29,6 +47,10 @@ function App() {
           </div>
         </div>
       ),
+    },
+    {
+      tabTitle: "TEST keepInactiveTabContentOnBackground",
+      tabContent: <TestComponent />,
     },
     {
       tabTitle: "Analytics and Performance Metrics",
@@ -157,17 +179,7 @@ function App() {
         </div>
       ),
     },
-    {
-      tabTitle: "System Administration Panel",
-      tabContent: (
-        <div className="space-y-4">
-          <h3 className="text-lg font-semibold text-gray-800">Admin Panel</h3>
-          <p className="text-gray-600">
-            Administrative tools and system management.
-          </p>
-        </div>
-      ),
-    },
+
     {
       tabTitle: "Quick Note",
       tabContent: (
@@ -199,7 +211,11 @@ function App() {
 
   return (
     <div className="min-h-screen w-screen max-w-screen flex flex-col p-10 gap-5">
-      <CustomTabSystem tabItems={tabItems} defaultActiveIndex={1} />
+      <CustomTabSystem
+        tabItems={tabItems}
+        defaultActiveIndex={0}
+        // keepInactiveTabContentOnBackground={true}
+      />
       <div className="bg-yellow-100 p-10">Div below tab</div>
     </div>
   );
