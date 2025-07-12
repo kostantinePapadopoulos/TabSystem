@@ -189,25 +189,31 @@ const CustomTabSystem: React.FC<TabSystemProps> = ({
         <button
           className={`${
             showLeftArrow ? "opacity-100" : "opacity-0 translate-x-[-100%]"
-          } transition-all duration-400 cursor-pointer absolute left-0 top-0 h-full w-12 bg-gradient-to-r from-gray-400 to-transparent flex items-center justify-start pl-1 z-10 group`}
+          } transition-all duration-400 cursor-pointer absolute left-0 top-0 h-full flex items-center justify-start z-10 group`}
           onClick={() => handleHorizontalScroll("left")}
           aria-label="Scroll left"
         >
-          <div className="group-hover:scale-120 transition-transform">
-            <ArrowLeft fill="rgba(0, 52, 118, 1)" />
+          <div className="w-8 h-full flex justify-center items-center bg-gray-300">
+            <div className="transition-transform group-hover:scale-110">
+              <ArrowLeft fill="rgba(0, 52, 118, 1)" />
+            </div>
           </div>
+          <div className="bg-gradient-to-r from-gray-300 to-transparent w-2 group-hover:w-4 transition-width duration-400 h-full"></div>
         </button>
 
         {/* Right Arrow */}
         <button
           className={`${
             showRightArrow ? "opacity-100" : "opacity-0 translate-x-full"
-          } transition-all duration-400 cursor-pointer absolute right-0 top-0 h-full w-12 bg-gradient-to-l from-gray-400 to-transparent flex items-center justify-end pr-1 z-10 group`}
+          } transition-all duration-400 cursor-pointer absolute right-0 top-0 h-full flex items-center justify-end z-10 group`}
           onClick={() => handleHorizontalScroll("right")}
           aria-label="Scroll right"
         >
-          <div className="group-hover:scale-120 transition-transform">
-            <ArrowRight fill="rgba(0, 52, 118, 1)" />
+          <div className="bg-gradient-to-l from-gray-300 to-transparent w-2 group-hover:w-4 transition-width duration-400 h-full"></div>
+          <div className="w-8 h-full flex justify-center items-center bg-gray-300">
+            <div className="transition-transform group-hover:scale-110">
+              <ArrowRight fill="rgba(0, 52, 118, 1)" />
+            </div>
           </div>
         </button>
 
