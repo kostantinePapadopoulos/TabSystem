@@ -199,7 +199,7 @@ function App() {
 
   return (
     <div className="min-h-screen w-screen max-w-screen flex flex-col p-10 gap-5">
-      <CustomTabSystem tabItems={tabItems} />
+      <CustomTabSystem tabItems={tabItems} defaultActiveIndex={1} />
       <div className="bg-yellow-100 p-10">Div below tab</div>
     </div>
   );

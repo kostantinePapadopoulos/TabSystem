@@ -2,24 +2,55 @@ import React, { useState, useEffect, useRef, type ReactNode } from "react";
 import ArrowLeft from "./src/ArrowLeft";
 import ArrowRight from "./src/ArrowRight";
 
-interface TabItem {
-  tabTitle: string;
-  tabContent: ReactNode;
-  disabled?: boolean;
+//Created by kpap (ψωνάρα)
+//Full animated tab system, triggers animation on tab change and readjusts height with transition if new tab content height is diffrent
+//On Header tab overflow creates horyzontal scroller with animated left/right arrows
+
+//Basic component props read before use!
+interface TabSystemProps {
+  tabItems: TabItem[]; // Array of tab data
+  defaultActiveIndex?: number; // Active tab index onLoad if not provided will show first tab
 }
 
-interface TabSystemProps {
-  tabItems: TabItem[];
-  defaultActiveIndex?: number;
-  className?: string;
+//Tab data props
+interface TabItem {
+  tabTitle: string | ReactNode; // Title as jsx or string for the tab button
+  tabContent: string | ReactNode; // Tab content as jsx or string
+  disabled?: boolean; // if tab is diabled with default false
 }
 
 const CustomTabSystem: React.FC<TabSystemProps> = ({
   tabItems,
   defaultActiveIndex = 0,
-  className = "",
 }) => {
-  const [activeIndex, setActiveIndex] = useState(defaultActiveIndex);
+  // Find the first non-disabled tab index starting from defaultActiveIndex
+  const findNextEnabledTab = (startIndex: number) => {
+    // First, try to find an enabled tab starting from the given index
+    for (let i = startIndex; i < tabItems.length; i++) {
+      if (!tabItems[i]?.disabled) {
+        return i;
+      }
+    }
+    // If no enabled tab found from startIndex to end, search from beginning
+    for (let i = 0; i < startIndex; i++) {
+      if (!tabItems[i]?.disabled) {
+        return i;
+      }
+    }
+    // If all tabs are disabled, return null
+    return null;
+  };
+
+  const getInitialActiveIndex = () => {
+    // If the default index is not disabled, use it
+    if (!tabItems[defaultActiveIndex]?.disabled) {
+      return defaultActiveIndex;
+    }
+    // Otherwise, find the next enabled tab
+    return findNextEnabledTab(defaultActiveIndex);
+  };
+
+  const [activeIndex, setActiveIndex] = useState(getInitialActiveIndex());
   const [contentHeight, setContentHeight] = useState<number | null>(null);
   const [showLeftArrow, setShowLeftArrow] = useState(false);
   const [showRightArrow, setShowRightArrow] = useState(false);
@@ -27,8 +58,15 @@ const CustomTabSystem: React.FC<TabSystemProps> = ({
   const headerContainerRef = useRef<HTMLDivElement | null>(null);
   const tabsWrapperRef = useRef<HTMLDivElement | null>(null);
 
+  // Update active index if defaultActiveIndex or tabItems change
+  useEffect(() => {
+    const newActiveIndex = getInitialActiveIndex();
+    setActiveIndex(newActiveIndex);
+  }, [defaultActiveIndex, tabItems]);
+
   // Animate height when active tab changes
   useEffect(() => {
+    if (!activeIndex) return;
     const activeContent = contentRefs.current[activeIndex];
     if (activeContent) {
       setContentHeight(activeContent.scrollHeight);
@@ -37,6 +75,7 @@ const CustomTabSystem: React.FC<TabSystemProps> = ({
 
   // Set initial height after first render
   useEffect(() => {
+    if (!activeIndex) return;
     const activeContent = contentRefs.current[activeIndex];
     if (activeContent && contentHeight === null) {
       setContentHeight(activeContent.scrollHeight);
@@ -127,14 +166,13 @@ const CustomTabSystem: React.FC<TabSystemProps> = ({
   };
 
   return (
-    <div className={`w-full drop-shadow ${className}`}>
+    <div className={`w-full drop-shadow`}>
       {/* Tab Headers */}
       <div
         ref={tabsWrapperRef}
         className="relative border-b border-gray-200 overflow-hidden"
       >
         {/* Left Arrow */}
-
         <button
           className={`${
             showLeftArrow ? "opacity-100" : "opacity-0 translate-x-[-100%]"
@@ -148,7 +186,6 @@ const CustomTabSystem: React.FC<TabSystemProps> = ({
         </button>
 
         {/* Right Arrow */}
-
         <button
           className={`${
             showRightArrow ? "opacity-100" : "opacity-0 translate-x-full"
@@ -166,8 +203,6 @@ const CustomTabSystem: React.FC<TabSystemProps> = ({
           ref={headerContainerRef}
           className="flex gap-1 overflow-x-auto overflow-y-hidden scrollbar-hide"
           style={{
-            paddingLeft: showLeftArrow ? "32px" : "0px",
-            paddingRight: showRightArrow ? "32px" : "0px",
             scrollbarWidth: "none",
             msOverflowStyle: "none",
           }}
