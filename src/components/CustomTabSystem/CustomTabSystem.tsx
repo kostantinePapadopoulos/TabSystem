@@ -183,7 +183,7 @@ const CustomTabSystem: React.FC<TabSystemProps> = ({
       {/* Tab Headers */}
       <div
         ref={tabsWrapperRef}
-        className="relative border-b border-gray-200 overflow-hidden"
+        className="relative border-b border-gray-200 overflow-hidden select-none"
       >
         {/* Left Arrow */}
         <button
@@ -193,12 +193,12 @@ const CustomTabSystem: React.FC<TabSystemProps> = ({
           onClick={() => handleHorizontalScroll("left")}
           aria-label="Scroll left"
         >
-          <div className="w-8 h-full flex justify-center items-center bg-gray-300">
+          <div className="w-8 h-full flex justify-center items-center bg-gray-100">
             <div className="transition-transform group-hover:scale-110">
               <ArrowLeft fill="rgba(0, 52, 118, 1)" />
             </div>
           </div>
-          <div className="bg-gradient-to-r from-gray-300 to-transparent w-2 group-hover:w-4 transition-width duration-400 h-full"></div>
+          <div className="bg-gradient-to-r from-gray-100 to-transparent w-4 group-hover:w-6 transition-width duration-400 h-full"></div>
         </button>
 
         {/* Right Arrow */}
@@ -209,8 +209,8 @@ const CustomTabSystem: React.FC<TabSystemProps> = ({
           onClick={() => handleHorizontalScroll("right")}
           aria-label="Scroll right"
         >
-          <div className="bg-gradient-to-l from-gray-300 to-transparent w-2 group-hover:w-4 transition-width duration-400 h-full"></div>
-          <div className="w-8 h-full flex justify-center items-center bg-gray-300">
+          <div className="bg-gradient-to-l from-gray-100 to-transparent w-4 group-hover:w-6 transition-width duration-400 h-full"></div>
+          <div className="w-8 h-full flex justify-center items-center bg-gray-100">
             <div className="transition-transform group-hover:scale-110">
               <ArrowRight fill="rgba(0, 52, 118, 1)" />
             </div>
@@ -237,11 +237,11 @@ const CustomTabSystem: React.FC<TabSystemProps> = ({
                 ${
                   activeIndex === index
                     ? "z-1 text-white bg-primary"
-                    : "text-gray-500 hover:text-primary"
+                    : "text-gray-600 hover:bg-primary/30 bg-opacit"
                 }
                 ${
                   item.disabled
-                    ? "cursor-not-allowed opacity-50 text-gray-400 hover:text-gray-400 hover:bg-transparent"
+                    ? "cursor-not-allowed opacity-50 text-gray-400 duration-200 hover:text-gray-400 hover:bg-transparent"
                     : "cursor-pointer"
                 }
               `}
