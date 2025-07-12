@@ -1,10 +1,5 @@
 import React from "react";
-
-interface ArrowIconProps {
-  width?: number | string;
-  height?: number | string;
-  fill?: string;
-}
+import type { ArrowIconProps } from "./ArrowIconProps";
 
 const ArrowLeft: React.FC<ArrowIconProps> = ({
   width = 24,
@@ -19,12 +14,12 @@ const ArrowLeft: React.FC<ArrowIconProps> = ({
   >
     <g id="layer1">
       <path
-        d="M 13 3.2910156 L 12.646484 3.6464844 L 6.2910156 10 L 12.646484 16.353516 L 13 16.708984 L 13.708984 16 L 13.353516 15.646484 L 7.7089844 10 L 13.353516 4.3535156 L 13.708984 4 L 13 3.2910156 z"
+        d="M 14 2.5 L 13.2 3.3 L 5.5 10 L 13.2 16.7 L 14 17.5 L 15.5 16 L 14.7 15.2 L 8.5 10 L 14.7 4.8 L 15.5 4 L 14 2.5 z"
         style={{
           fill,
           fillOpacity: 1,
           stroke: "none",
-          strokeWidth: 1,
+          strokeWidth: 2,
         }}
       />
     </g>

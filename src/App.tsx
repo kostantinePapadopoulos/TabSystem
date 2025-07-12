@@ -213,8 +213,8 @@ function App() {
     <div className="min-h-screen w-screen max-w-screen flex flex-col p-10 gap-5">
       <CustomTabSystem
         tabItems={tabItems}
-        defaultActiveIndex={0}
-        // keepInactiveTabContentOnBackground={true}
+        // defaultActiveIndex={0}
+        mountAllTabs={true}
       />
       <div className="bg-yellow-100 p-10">Div below tab</div>
     </div>

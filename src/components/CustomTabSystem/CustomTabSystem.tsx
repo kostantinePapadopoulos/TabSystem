@@ -3,6 +3,7 @@ import ArrowLeft from "./src/ArrowLeft";
 import ArrowRight from "./src/ArrowRight";
 
 //Created by kpap (ψωνάρα)
+//https://github.com/kostantinePapadopoulos/TabSystem
 //Full animated tab system, triggers animation on tab change and readjusts height with transition if new tab content height is diffrent
 //On Header tab overflow creates horyzontal scroller with animated left/right arrows
 
@@ -12,7 +13,7 @@ interface TabSystemProps {
   defaultActiveIndex?: number; // Active tab index onLoad if not provided will show first tab
   //(keepInactiveTabContentOnBackground Default false) TRUE: Load all tab contents on first load , this will keep the states of each tab content running adn persistent all time, if api calls occur in tab contents all api of all tabs will occur on page load
   //FALSE: mount the tab content on tab change this will reset state and refetch data f.e everytime we change tabs
-  keepInactiveTabContentOnBackground?: boolean;
+  mountAllTabs?: boolean;
 }
 
 //Tab data props
@@ -25,7 +26,7 @@ interface TabItem {
 const CustomTabSystem: React.FC<TabSystemProps> = ({
   tabItems,
   defaultActiveIndex = 0,
-  keepInactiveTabContentOnBackground = false,
+  mountAllTabs = false,
 }) => {
   // Find the first non-disabled tab index starting from defaultActiveIndex
   const findNextEnabledTab = (startIndex: number) => {
@@ -169,6 +170,14 @@ const CustomTabSystem: React.FC<TabSystemProps> = ({
     });
   };
 
+  //mount all tab contents or only the active
+  const renderTabContent = (item: TabItem, index: number) => {
+    const isActiveTab = activeIndex === index;
+    const shouldRender = mountAllTabs || isActiveTab;
+
+    return shouldRender ? item.tabContent : null;
+  };
+
   return (
     <div className={`w-full drop-shadow`}>
       {/* Tab Headers */}
@@ -180,12 +189,12 @@ const CustomTabSystem: React.FC<TabSystemProps> = ({
         <button
           className={`${
             showLeftArrow ? "opacity-100" : "opacity-0 translate-x-[-100%]"
-          } transition-all duration-400 cursor-pointer absolute left-0 top-0 h-full w-8 bg-gradient-to-r from-gray-300 to-transparent flex items-center justify-center z-10 group`}
+          } transition-all duration-400 cursor-pointer absolute left-0 top-0 h-full w-12 bg-gradient-to-r from-gray-400 to-transparent flex items-center justify-start pl-1 z-10 group`}
           onClick={() => handleHorizontalScroll("left")}
           aria-label="Scroll left"
         >
           <div className="group-hover:scale-120 transition-transform">
-            <ArrowLeft />
+            <ArrowLeft fill="rgba(0, 52, 118, 1)" />
           </div>
         </button>
 
@@ -193,12 +202,12 @@ const CustomTabSystem: React.FC<TabSystemProps> = ({
         <button
           className={`${
             showRightArrow ? "opacity-100" : "opacity-0 translate-x-full"
-          } transition-all duration-400 cursor-pointer absolute right-0 top-0 h-full w-8 bg-gradient-to-l from-gray-300 to-transparent flex items-center justify-center z-10 group`}
+          } transition-all duration-400 cursor-pointer absolute right-0 top-0 h-full w-12 bg-gradient-to-l from-gray-400 to-transparent flex items-center justify-end pr-1 z-10 group`}
           onClick={() => handleHorizontalScroll("right")}
           aria-label="Scroll right"
         >
           <div className="group-hover:scale-120 transition-transform">
-            <ArrowRight />
+            <ArrowRight fill="rgba(0, 52, 118, 1)" />
           </div>
         </button>
 
@@ -257,13 +266,7 @@ const CustomTabSystem: React.FC<TabSystemProps> = ({
               }
             `}
           >
-            {keepInactiveTabContentOnBackground ? (
-              item.tabContent
-            ) : activeIndex === index ? (
-              item.tabContent
-            ) : (
-              <></>
-            )}
+            {renderTabContent(item, index)}
           </div>
         ))}
       </div>
