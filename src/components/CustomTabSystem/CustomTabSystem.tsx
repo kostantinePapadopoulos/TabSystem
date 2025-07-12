@@ -11,7 +11,7 @@ import ArrowRight from "./src/ArrowRight";
 interface TabSystemProps {
   tabItems: TabItem[]; // Array of tab data
   defaultActiveIndex?: number; // Active tab index onLoad if not provided will show first tab
-  //(keepInactiveTabContentOnBackground Default false) TRUE: Load all tab contents on first load , this will keep the states of each tab content running adn persistent all time, if api calls occur in tab contents all api of all tabs will occur on page load
+  //(mountAllTabs Default false) TRUE: Load all tab contents on first load , this will keep the states of each tab content running adn persistent all time, if api calls occur in tab contents all api of all tabs will occur on page load
   //FALSE: mount the tab content on tab change this will reset state and refetch data f.e everytime we change tabs
   mountAllTabs?: boolean;
 }
