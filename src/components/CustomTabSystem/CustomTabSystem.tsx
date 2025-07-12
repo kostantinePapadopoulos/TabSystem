@@ -11,7 +11,7 @@ import ArrowRight from "./src/ArrowRight";
 interface TabSystemProps {
   tabItems: TabItem[]; // Array of tab data
   defaultActiveIndex?: number; // Active tab index onLoad if not provided will show first tab
-  //(mountAllTabs Default false) TRUE: Load all tab contents on first load , this will keep the states of each tab content running adn persistent all time, if api calls occur in tab contents all api of all tabs will occur on page load
+  //(mountAllTabs Default false) TRUE: Load/mount all tab contents on first load , this will keep the states of each tab content running and be persistent all time, if api calls occurs in tab contents all api of all tabs will occur on page load
   //FALSE: mount the tab content on tab change this will reset state and refetch data f.e everytime we change tabs
   mountAllTabs?: boolean;
 }
@@ -264,7 +264,7 @@ const CustomTabSystem: React.FC<TabSystemProps> = ({
               contentRefs.current[index] = el;
             }}
             className={`
-              p-6 transition-all duration-300 ease-in-out
+              p-6 transition-all duration-500 ease-in-out
               ${
                 activeIndex === index
                   ? "opacity-100 translate-y-0 relative"
