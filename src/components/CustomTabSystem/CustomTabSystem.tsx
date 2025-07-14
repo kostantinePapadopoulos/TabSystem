@@ -6,6 +6,7 @@ import ArrowRight from "./src/ArrowRight";
 //https://github.com/kostantinePapadopoulos/TabSystem
 //Full animated tab system, triggers animation on tab change and readjusts height with transition if new tab content height is diffrent
 //On Header tab overflow creates horyzontal scroller with animated left/right arrows
+//Enhanced with drag scrolling functionality
 
 //Basic component props read before use!
 interface TabSystemProps {
@@ -28,16 +29,10 @@ const CustomTabSystem: React.FC<TabSystemProps> = ({
   defaultActiveIndex = 0,
   mountAllTabs = false,
 }) => {
-  // Find the first non-disabled tab index starting from defaultActiveIndex
-  const findNextEnabledTab = (startIndex: number) => {
-    // First, try to find an enabled tab starting from the given index
-    for (let i = startIndex; i < tabItems.length; i++) {
-      if (!tabItems[i]?.disabled) {
-        return i;
-      }
-    }
-    // If no enabled tab found from startIndex to end, search from beginning
-    for (let i = 0; i < startIndex; i++) {
+  // Find the first non-disabled tab index
+  const findFirstEnabledTab = () => {
+    // First, try to find an enabled tab starting from the from beginning
+    for (let i = 0; i < tabItems.length; i++) {
       if (!tabItems[i]?.disabled) {
         return i;
       }
@@ -52,13 +47,20 @@ const CustomTabSystem: React.FC<TabSystemProps> = ({
       return defaultActiveIndex;
     }
     // Otherwise, find the next enabled tab
-    return findNextEnabledTab(defaultActiveIndex);
+    return findFirstEnabledTab();
   };
 
   const [activeIndex, setActiveIndex] = useState(getInitialActiveIndex());
   const [contentHeight, setContentHeight] = useState<number | null>(null);
   const [showLeftArrow, setShowLeftArrow] = useState(false);
   const [showRightArrow, setShowRightArrow] = useState(false);
+
+  // Drag scrolling state
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStart, setDragStart] = useState({ x: 0, scrollLeft: 0 });
+  const [canScroll, setCanScroll] = useState(false);
+  const [hasDragged, setHasDragged] = useState(false);
+
   const contentRefs = useRef<(HTMLDivElement | null)[]>([]);
   const headerContainerRef = useRef<HTMLDivElement | null>(null);
   const tabsWrapperRef = useRef<HTMLDivElement | null>(null);
@@ -93,8 +95,13 @@ const CustomTabSystem: React.FC<TabSystemProps> = ({
     if (!container) return;
 
     const { scrollLeft, scrollWidth, clientWidth } = container;
-    setShowLeftArrow(scrollLeft > 0);
-    setShowRightArrow(scrollLeft < scrollWidth - clientWidth);
+    const hasOverflow = scrollWidth > clientWidth;
+    const showLeft = scrollLeft > 0;
+    const showRight = scrollLeft < scrollWidth - clientWidth;
+
+    setShowLeftArrow(showLeft);
+    setShowRightArrow(showRight);
+    setCanScroll(hasOverflow);
   };
 
   // Initialize scroll arrow visibility
@@ -117,7 +124,7 @@ const CustomTabSystem: React.FC<TabSystemProps> = ({
   }, []);
 
   const handleTabClick = (index: number) => {
-    if (!tabItems[index]?.disabled) {
+    if (!tabItems[index]?.disabled && !hasDragged) {
       setActiveIndex(index);
       // Scroll active tab into view
       scrollToTab(index);
@@ -170,6 +177,83 @@ const CustomTabSystem: React.FC<TabSystemProps> = ({
     });
   };
 
+  // Drag scrolling handlers
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (!canScroll) return;
+
+    const container = headerContainerRef.current;
+    if (!container) return;
+
+    setIsDragging(true);
+    setHasDragged(false);
+    setDragStart({
+      x: e.pageX - container.offsetLeft,
+      scrollLeft: container.scrollLeft,
+    });
+
+    // Prevent text selection during drag
+    e.preventDefault();
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging || !canScroll) return;
+
+    const container = headerContainerRef.current;
+    if (!container) return;
+
+    e.preventDefault();
+    const x = e.pageX - container.offsetLeft;
+    const walk = (x - dragStart.x) * 2; // Multiply by 2 for faster scrolling
+
+    // If there's significant movement, mark as dragged
+    if (Math.abs(walk) > 5) {
+      setHasDragged(true);
+    }
+
+    container.scrollLeft = dragStart.scrollLeft - walk;
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+    // Reset hasDragged after a short delay to prevent click
+    setTimeout(() => setHasDragged(false), 100);
+  };
+
+  const handleMouseLeave = () => {
+    setIsDragging(false);
+    // Reset hasDragged after a short delay to prevent click on mouse release
+    setTimeout(() => setHasDragged(false), 100);
+  };
+
+  // Touch event handlers for drag scrolling
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (!canScroll) return;
+
+    const container = headerContainerRef.current;
+    if (!container) return;
+
+    setIsDragging(true);
+    setDragStart({
+      x: e.touches[0].pageX - container.offsetLeft,
+      scrollLeft: container.scrollLeft,
+    });
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (!isDragging || !canScroll) return;
+
+    const container = headerContainerRef.current;
+    if (!container) return;
+
+    const x = e.touches[0].pageX - container.offsetLeft;
+    const walk = (x - dragStart.x) * 2;
+    container.scrollLeft = dragStart.scrollLeft - walk;
+  };
+
+  const handleTouchEnd = () => {
+    setIsDragging(false);
+  };
+
   //mount all tab contents or only the active
   const renderTabContent = (item: TabItem, index: number) => {
     const isActiveTab = activeIndex === index;
@@ -220,11 +304,18 @@ const CustomTabSystem: React.FC<TabSystemProps> = ({
         {/* Scrollable Tab Container */}
         <div
           ref={headerContainerRef}
-          className="flex gap-1 overflow-x-auto overflow-y-hidden scrollbar-hide"
+          className={`flex gap-1 overflow-x-auto overflow-y-hidden scrollbar-hide`}
           style={{
             scrollbarWidth: "none",
             msOverflowStyle: "none",
           }}
+          onMouseDown={handleMouseDown}
+          onMouseMove={handleMouseMove}
+          onMouseUp={handleMouseUp}
+          onMouseLeave={handleMouseLeave}
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
         >
           {tabItems.map((item, index) => (
             <button
@@ -233,7 +324,7 @@ const CustomTabSystem: React.FC<TabSystemProps> = ({
               disabled={item.disabled}
               className={`
                 px-6 py-3 text-sm font-medium transition-all rounded-t duration-200
-                whitespace-nowrap flex-shrink-0 border border-gray-200
+                whitespace-nowrap flex-shrink-0 border border-gray-200 border-b-0
                 ${
                   activeIndex === index
                     ? "z-1 text-white bg-primary"
@@ -241,7 +332,9 @@ const CustomTabSystem: React.FC<TabSystemProps> = ({
                 }
                 ${
                   item.disabled
-                    ? "cursor-not-allowed opacity-50 text-gray-400 duration-200 hover:text-gray-400 hover:bg-transparent"
+                    ? "cursor-not-allowed opacity-50 text-gray-400 duration-200  hover:bg-transparent"
+                    : isDragging
+                    ? "cursor-grabbing"
                     : "cursor-pointer"
                 }
               `}
@@ -254,7 +347,7 @@ const CustomTabSystem: React.FC<TabSystemProps> = ({
 
       {/* Tab Content */}
       <div
-        className="relative bg-gray-50 rounded-b overflow-hidden transition-all duration-300 ease-in-out"
+        className="relative bg-gray-50 rounded-b overflow-hidden transition-all duration-600 ease-in-out"
         style={{ height: contentHeight ? `${contentHeight}px` : "auto" }}
       >
         {tabItems.map((item, index) => (
@@ -264,7 +357,7 @@ const CustomTabSystem: React.FC<TabSystemProps> = ({
               contentRefs.current[index] = el;
             }}
             className={`
-              p-6 transition-all duration-500 ease-in-out
+              p-6 transition-all duration-600 ease-in-out
               ${
                 activeIndex === index
                   ? "opacity-100 translate-y-0 relative"
