@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, type ReactNode } from "react";
 import ArrowLeft from "./src/ArrowLeft";
 import ArrowRight from "./src/ArrowRight";
 
-//Created by kpap (ψωνάρα)
+//Created by kpap
 //https://github.com/kostantinePapadopoulos/TabSystem
 //Full animated tab system, triggers animation on tab change and readjusts height with transition if new tab content height is diffrent
 //On Header tab overflow creates horyzontal scroller with animated left/right arrows
@@ -64,6 +64,7 @@ const CustomTabSystem: React.FC<TabSystemProps> = ({
   const contentRefs = useRef<(HTMLDivElement | null)[]>([]);
   const headerContainerRef = useRef<HTMLDivElement | null>(null);
   const tabsWrapperRef = useRef<HTMLDivElement | null>(null);
+  const resizeObserverRef = useRef<ResizeObserver | null>(null);
 
   // Update active index if defaultActiveIndex or tabItems change
   useEffect(() => {
@@ -71,13 +72,19 @@ const CustomTabSystem: React.FC<TabSystemProps> = ({
     setActiveIndex(newActiveIndex);
   }, [defaultActiveIndex, tabItems]);
 
-  // Animate height when active tab changes
-  useEffect(() => {
+  // Function to update content height
+  const updateContentHeight = () => {
     if (activeIndex === null) return;
     const activeContent = contentRefs.current[activeIndex];
     if (activeContent) {
-      setContentHeight(activeContent.scrollHeight);
+      const newHeight = activeContent.scrollHeight;
+      setContentHeight(newHeight);
     }
+  };
+
+  // Animate height when active tab changes
+  useEffect(() => {
+    updateContentHeight();
   }, [activeIndex]);
 
   // Set initial height after first render
@@ -88,6 +95,74 @@ const CustomTabSystem: React.FC<TabSystemProps> = ({
       setContentHeight(activeContent.scrollHeight);
     }
   }, [activeIndex, contentHeight]);
+
+  // Monitor content height changes using ResizeObserver
+  useEffect(() => {
+    if (activeIndex === null) return;
+
+    const activeContent = contentRefs.current[activeIndex];
+    if (!activeContent) return;
+
+    // Clean up previous observer
+    if (resizeObserverRef.current) {
+      resizeObserverRef.current.disconnect();
+    }
+
+    // Create new ResizeObserver for the active content
+    resizeObserverRef.current = new ResizeObserver(() => {
+      updateContentHeight();
+    });
+
+    // Start observing the active content
+    resizeObserverRef.current.observe(activeContent);
+
+    // Cleanup function
+    return () => {
+      if (resizeObserverRef.current) {
+        resizeObserverRef.current.disconnect();
+      }
+    };
+  }, [activeIndex]);
+
+  // Alternative approach: Monitor DOM mutations for content changes
+  useEffect(() => {
+    if (activeIndex === null) return;
+
+    const activeContent = contentRefs.current[activeIndex];
+    if (!activeContent) return;
+
+    // Create a MutationObserver to watch for DOM changes
+    const mutationObserver = new MutationObserver(() => {
+      // Use requestAnimationFrame to ensure DOM has updated
+      requestAnimationFrame(() => {
+        updateContentHeight();
+      });
+    });
+
+    // Start observing
+    mutationObserver.observe(activeContent, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ["style", "class"], // Watch for style/class changes that might affect height
+    });
+
+    // Cleanup
+    return () => {
+      mutationObserver.disconnect();
+    };
+  }, [activeIndex]);
+
+  // Monitor window resize to recalculate height if needed
+  useEffect(() => {
+    const handleResize = () => {
+      updateContentHeight();
+      checkScrollArrows();
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, [activeIndex]);
 
   // Check if scroll arrows should be shown
   const checkScrollArrows = () => {
@@ -113,15 +188,6 @@ const CustomTabSystem: React.FC<TabSystemProps> = ({
       return () => container.removeEventListener("scroll", checkScrollArrows);
     }
   }, [tabItems]);
-
-  // Handle window resize
-  useEffect(() => {
-    const handleResize = () => {
-      checkScrollArrows();
-    };
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
 
   const handleTabClick = (index: number) => {
     if (!tabItems[index]?.disabled && !hasDragged) {
